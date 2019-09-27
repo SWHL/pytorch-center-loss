@@ -29,8 +29,11 @@ class CenterLoss(nn.Module):
             labels: ground truth labels with shape (batch_size).
         """
         batch_size = x.size(0)
+        # ||x-y||_2 = (x-y)^2 = x^2 + y^2 - 2xy
+        # This part of the calculation is “x^2+y^2”
         distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
                   torch.pow(self.centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
+        # This part is "x^2+y^2 - 2xy"
         distmat.addmm_(1, -2, x, self.centers.t())
 
         classes = torch.arange(self.num_classes).long()
